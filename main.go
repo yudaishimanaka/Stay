@@ -5,8 +5,8 @@ import (
 
 	"./router"
 
-	"github.com/go-xorm/xorm"
 	"github.com/BurntSushi/toml"
+	"github.com/go-xorm/xorm"
 )
 
 type Config struct {
@@ -14,7 +14,7 @@ type Config struct {
 }
 
 type MySQLConfig struct {
-	User 	 string `toml:"user"`
+	User     string `toml:"user"`
 	Password string `toml:"password"`
 	Database string `toml:"database"`
 }
@@ -29,7 +29,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	engine, err := xorm.NewEngine("mysql", conf.MySQL.User + ":" + conf.MySQL.Password+"@/"+conf.MySQL.Database)
+	engine, err := xorm.NewEngine("mysql", conf.MySQL.User+":"+conf.MySQL.Password+"@/"+conf.MySQL.Database)
 	if err != nil {
 		log.Fatal(err)
 	}
