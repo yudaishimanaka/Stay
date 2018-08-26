@@ -21,3 +21,17 @@ main {
     display: inline;
     top: 22px;
 }
+
+.card {
+    width: 200px;
+    margin-top: 12px;
+    margin-bottom: 0px;
+    margin-left: 12px;
+}
+
+.users {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
