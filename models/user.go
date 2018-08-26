@@ -5,10 +5,10 @@ import (
 )
 
 type User struct {
-	UserId int `xorm:"user_id not null BIGINT pk autoincr"`
-	UserName string `xorm:"user_name not null"`
-	HwAddr string `xorm:"mac_address not null"`
-	IconPath string `xorm:"icon_path"`
+	UserId int `xorm:"user_id not null BIGINT pk autoincr" json:"user_id"`
+	UserName string `xorm:"user_name not null" json:"user_name"`
+	HwAddr string `xorm:"mac_address not null" json:"hw_addr"`
+	IconPath string `xorm:"icon_path" json:"icon_path"`
 }
 
 func (u *User) GetUserId() int { return u.UserId }
