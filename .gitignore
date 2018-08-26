@@ -12,6 +12,6 @@
 *.out
 
 # App
-config.json
+config.toml
 .idea/*
 .idea
