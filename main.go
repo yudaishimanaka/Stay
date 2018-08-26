@@ -2,26 +2,43 @@ package main
 
 import (
 	"log"
-	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"./router"
+
+	"github.com/go-xorm/xorm"
+	"github.com/BurntSushi/toml"
 )
 
+type Config struct {
+	MySQL MySQLConfig `toml:"mysql"`
+}
+
+type MySQLConfig struct {
+	User 	 string `toml:"user"`
+	Password string `toml:"password"`
+	Database string `toml:"database"`
+}
+
+func init() {
+}
+
 func main() {
-	log.Println("[searcher]: server start")
+	var conf Config
+	_, err := toml.DecodeFile("config.toml", &conf)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	r := gin.Default()
-	r.LoadHTMLGlob("templates/*.html")
+	engine, err := xorm.NewEngine("mysql", conf.MySQL.User + ":" + conf.MySQL.Password+"@/"+conf.MySQL.Database)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(http.StatusMovedPermanently, "/dashboard")
-	})
+	engine.SetMaxIdleConns(5000)
+	engine.SetMaxOpenConns(1000)
 
-	r.GET("/dashboard", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "dashboard.html", gin.H{})
-	})
+	defer engine.Close()
 
-	r.Static("/assets", "./assets")
-
+	r := router.Init(engine)
 	r.Run(":8888")
 }
