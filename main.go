@@ -18,7 +18,7 @@ func main() {
 	})
 
 	r.GET("/dashboard", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "board.html", gin.H{})
+		c.HTML(http.StatusOK, "dashboard.html", gin.H{})
 	})
 
 	r.Static("/assets", "./assets")
