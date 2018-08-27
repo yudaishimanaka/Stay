@@ -19,9 +19,6 @@ type MySQLConfig struct {
 	Database string `toml:"database"`
 }
 
-func init() {
-}
-
 func main() {
 	var conf Config
 	_, err := toml.DecodeFile("config.toml", &conf)
