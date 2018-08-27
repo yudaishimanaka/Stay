@@ -2,16 +2,19 @@ package router
 
 import (
 	"net/http"
+	"log"
 
 	"../models"
 
 	"github.com/gin-gonic/gin"
+	"gopkg.in/olahol/melody.v1"
 	"github.com/go-xorm/xorm"
 	_ "github.com/go-sql-driver/mysql"
 )
 
 func Init(engine *xorm.Engine) *gin.Engine {
 	r := gin.New()
+	w := melody.New()
 
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/assets", "./assets")
@@ -22,6 +25,10 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 	r.GET("/dashboard", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "dashboard.html", gin.H{})
+	})
+
+	r.GET("/ws", func(c *gin.Context) {
+		w.HandleRequest(c.Writer, c.Request)
 	})
 
 	userGroup := r.Group("/user")
@@ -64,6 +71,15 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 		})
 	}
+
+	// web socket router
+	w.HandleConnect(func(s *melody.Session) {
+		log.Printf("websocket connection open.")
+	})
+
+	w.HandleDisconnect(func(s *melody.Session) {
+		log.Printf("websocket connection close.")
+	})
 
 	return r
 }
