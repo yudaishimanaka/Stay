@@ -55,6 +55,14 @@ func Init(engine *xorm.Engine) *gin.Engine {
 				}
 			}
 		})
+
+		userGroup.POST("/update/:userName", func(c *gin.Context) {
+
+		})
+
+		userGroup.DELETE("/delete/:userName", func(c *gin.Context) {
+
+		})
 	}
 
 	return r
