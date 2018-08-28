@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"./router"
 
@@ -20,6 +21,7 @@ type MySQLConfig struct {
 }
 
 func main() {
+	// mysql engine create
 	var conf Config
 	_, err := toml.DecodeFile("config.toml", &conf)
 	if err != nil {
@@ -35,6 +37,18 @@ func main() {
 	engine.SetMaxOpenConns(1000)
 
 	defer engine.Close()
+
+	// make directory for user icon
+	if _, err := os.Stat("userIcon"); os.IsNotExist(err) {
+		err := os.Mkdir("userIcon", 0777)
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			log.Printf("successfuly created userIcon dir")
+		}
+	} else {
+		log.Printf("already exists")
+	}
 
 	r := router.Init(engine)
 	r.Run(":8888")
