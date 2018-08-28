@@ -3,6 +3,7 @@ package router
 import (
 	"net/http"
 	"log"
+	//"encoding/binary"
 
 	"../models"
 
@@ -79,6 +80,10 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 	w.HandleDisconnect(func(s *melody.Session) {
 		log.Printf("websocket connection close.")
+	})
+
+	w.HandleMessage(func(s *melody.Session, msg []byte) {
+		w.Broadcast(msg)
 	})
 
 	return r
