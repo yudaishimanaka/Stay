@@ -24,9 +24,9 @@ main {
 }
 
 .row .user-box {
-    width: 16.6%;
+    width: 15%;
     position: relative;
-    margin: 0.5rem 0.5rem 0.5rem 0.5rem;
+    margin: 1rem 0.6rem 1rem 0.6rem;
 }
 
 .bg-image {
@@ -45,7 +45,7 @@ main {
     width: 100%;
     bottom: 0%;
     color: #fff;
-    font-size: 2rem;
+    font-size: 1.5rem;
     padding: 12px 12px 12px 12px;
     position: absolute;
     display: inline-block;
