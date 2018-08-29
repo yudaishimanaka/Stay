@@ -3,7 +3,8 @@ package router
 import (
 	"net/http"
 	"log"
-	//"encoding/binary"
+	"os"
+	"io"
 
 	"../models"
 
@@ -35,33 +36,79 @@ func Init(engine *xorm.Engine) *gin.Engine {
 	userGroup := r.Group("/user")
 	{
 		userGroup.GET("/view/:userName", func(c *gin.Context) {
+			var errMsg string
+			user := models.User{}
 			userName := c.Params.ByName("userName")
-			view := models.User{UserName: userName}
-			has, err := engine.Get(&view)
+			has, err := engine.Where("user_name = '"+userName+"'").Get(&user)
 			if err != nil {
-				panic(err)
+				errMsg = "query failed (find user)"
+				c.JSON(http.StatusBadRequest, errMsg)
 			} else {
 				if has == true {
-					c.JSON(http.StatusCreated, view)
+					c.JSON(http.StatusCreated, user)
 				} else {
-					c.JSON(http.StatusBadRequest, "don't find user")
+					errMsg = "user not found"
+					c.JSON(http.StatusBadRequest, errMsg)
 				}
 			}
 		})
 
 		userGroup.POST("/register", func(c *gin.Context) {
 			var user models.User
-			err := c.BindJSON(&user)
+			var errMsg string
+
+			// bind request
+			err := c.Bind(&user)
 			if err != nil {
-				c.JSON(http.StatusBadRequest, "has need username")
+				errMsg = "query failed (can not bind request)"
+				c.JSON(http.StatusBadRequest, errMsg)
 			} else {
-				_, err := engine.Insert(&user)
+				// check user same name
+				checkExistenceUser := "select count(*) from user where user_name = '"+user.UserName+"'"
+				counts, err := engine.SQL(checkExistenceUser).Count()
 				if err != nil {
-					panic(err)
+					errMsg = "query failed (select error)"
+					c.JSON(http.StatusBadRequest, errMsg)
 				} else {
-					c.JSON(http.StatusCreated, "user register success")
+					if counts > 0 {
+						errMsg = "a user with the same name already exists, please change it to a different name"
+						c.JSON(http.StatusBadRequest, errMsg)
+					} else {
+						// hwAddr null check
+						if user.HwAddr == "" {
+							errMsg = "insert failed (mac_address is null)"
+							c.JSON(http.StatusBadRequest, errMsg)
+						} else {
+							// save user icon
+							file, header, _ := c.Request.FormFile("icon")
+							file.Close()
+							out, _ := os.Create("./userIcon/"+header.Filename)
+							defer out.Close()
+							io.Copy(out, file)
+							user.IconPath = "userIcon/"+header.Filename
+
+							// insert request
+							_, err = engine.Insert(&user)
+							if err != nil {
+								errMsg = "query failed (insert error)"
+								c.JSON(http.StatusBadRequest, errMsg)
+							} else {
+								c.JSON(http.StatusCreated, "user register success")
+							}
+						}
+					}
 				}
 			}
+		})
+
+		userGroup.POST("/iconUpdate/:userName", func(c *gin.Context) {
+			// receive and get file
+			file, err := c.FormFile("icon")
+			if err != nil {
+				log.Printf("receive error")
+			}
+
+			log.Println(file)
 		})
 
 		userGroup.POST("/update/:userName", func(c *gin.Context) {
