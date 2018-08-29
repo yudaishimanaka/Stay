@@ -15,3 +15,5 @@
 config.toml
 .idea/*
 .idea
+userIcon/*
+userIcon
