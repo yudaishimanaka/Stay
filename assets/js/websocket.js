@@ -17,7 +17,7 @@ ws.addEventListener('message', function (ev) {
         fetch(window.location.protocol+'//'+window.location.host+'/user/viewAll')
             .then(function (response) {
                 if(response.ok) {
-                    return response.json()
+                    return response.json();
                 }
 
                 throw new Error('Network response was not ok.')
@@ -25,7 +25,7 @@ ws.addEventListener('message', function (ev) {
             .then(function (json) {
                 console.log(json);
                 for(var i = 0; json.length; i++) {
-                    path = window.location.protocol+"//"+window.location.host+"/"+json[i]["IconPath"];
+                    var path = window.location.protocol+"//"+window.location.host+"/"+json[i]["IconPath"];
                     $(".users").append('<div class="user-box"><div class="bg-image" style="background-image: url('+path+')"></div><span class="image-title">'+json[i]["UserName"]+'</span></div>');
                 }
             })
