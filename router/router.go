@@ -20,6 +20,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 	r.LoadHTMLGlob("templates/*.html")
 	r.Static("/assets", "./assets")
+	r.Static("/userIcon", "./userIcon")
 
 	r.GET("/", func(c *gin.Context) {
 		c.Redirect(http.StatusMovedPermanently, "/dashboard")
@@ -81,7 +82,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 						} else {
 							// save user icon
 							file, header, _ := c.Request.FormFile("icon")
-							file.Close()
+							defer file.Close()
 							out, _ := os.Create("./userIcon/"+header.Filename)
 							defer out.Close()
 							io.Copy(out, file)
@@ -93,7 +94,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 								errMsg = "query failed (insert error)"
 								c.JSON(http.StatusBadRequest, errMsg)
 							} else {
-								c.JSON(http.StatusCreated, "user register success")
+								c.JSON(http.StatusCreated, "user register successfully")
 							}
 						}
 					}
@@ -101,22 +102,19 @@ func Init(engine *xorm.Engine) *gin.Engine {
 			}
 		})
 
-		userGroup.POST("/iconUpdate/:userName", func(c *gin.Context) {
-			// receive and get file
-			file, err := c.FormFile("icon")
-			if err != nil {
-				log.Printf("receive error")
-			}
-
-			log.Println(file)
-		})
-
-		userGroup.POST("/update/:userName", func(c *gin.Context) {
-
-		})
-
 		userGroup.DELETE("/delete/:userName", func(c *gin.Context) {
+			var user models.User
+			var errMsg string
 
+			// get request
+			userName := c.Params.ByName("userName")
+			_, err := engine.Where("user_name = '"+userName+"'").Delete(&user)
+			if err != nil {
+				errMsg = "query failed (delete user)"
+				c.JSON(http.StatusBadRequest, errMsg)
+			} else {
+				c.JSON(http.StatusCreated, "user delete successfully")
+			}
 		})
 	}
 
