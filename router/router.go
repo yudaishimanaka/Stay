@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"io"
+	"strconv"
 
 	"../models"
 
@@ -12,6 +13,10 @@ import (
 	"gopkg.in/olahol/melody.v1"
 	"github.com/go-xorm/xorm"
 	_ "github.com/go-sql-driver/mysql"
+)
+
+const (
+	EventUpdate = iota
 )
 
 func Init(engine *xorm.Engine) *gin.Engine {
@@ -51,6 +56,19 @@ func Init(engine *xorm.Engine) *gin.Engine {
 					errMsg = "user not found"
 					c.JSON(http.StatusBadRequest, errMsg)
 				}
+			}
+		})
+
+		userGroup.GET("/viewAll", func(c *gin.Context) {
+			var users []models.User
+			var errMsg string
+
+			err := engine.Find(&users)
+			if err != nil {
+				errMsg = "query failed (select * from user)"
+				c.JSON(http.StatusBadRequest, errMsg)
+			} else {
+				c.JSON(http.StatusCreated, users)
 			}
 		})
 
@@ -128,6 +146,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 	})
 
 	w.HandleMessage(func(s *melody.Session, msg []byte) {
+		msg = []byte(strconv.Itoa(EventUpdate))
 		w.Broadcast(msg)
 	})
 
