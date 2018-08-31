@@ -24,6 +24,7 @@ ws.addEventListener('message', function (ev) {
             })
             .then(function (json) {
                 console.log(json);
+                $(".users").html("");
                 for(var i = 0; json.length; i++) {
                     var path = window.location.protocol+"//"+window.location.host+"/"+json[i]["IconPath"];
                     $(".users").append('<div class="user-box"><div class="bg-image" style="background-image: url('+path+')"></div><span class="image-title">'+json[i]["UserName"]+'</span></div>');
@@ -36,5 +37,5 @@ ws.addEventListener('message', function (ev) {
 
 // connection close
 ws.addEventListener('close', function (ev) {
-    console.log('connection close', ev.code)
+    console.log('connection close', ev.code);
 });
