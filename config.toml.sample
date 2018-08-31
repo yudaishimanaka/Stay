@@ -1,6 +1,7 @@
 [app]
 interface = ""
 network = ""
+arp_interval =
 
 [mysql]
 user = ""
