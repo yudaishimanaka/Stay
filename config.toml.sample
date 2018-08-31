@@ -1,5 +1,5 @@
 [app]
-interface = ""
+network_interface = ""
 network = ""
 arp_interval =
 
