@@ -13,7 +13,7 @@ ws.addEventListener('open', function () {
 // listen message
 ws.addEventListener('message', function (ev) {
     console.log('event id is', ev.data);
-    if (ev.data == 0) {
+    if (ev.data == EventUpdate) {
         fetch(window.location.protocol+'//'+window.location.host+'/user/viewAll')
             .then(function (response) {
                 if(response.ok) {
