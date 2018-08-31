@@ -13,6 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gopkg.in/olahol/melody.v1"
 	"github.com/go-xorm/xorm"
+	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -20,7 +21,22 @@ const (
 	EventUpdate = iota
 )
 
+type Config struct {
+	App AppConfig `toml:"app"`
+}
+
+type AppConfig struct {
+	Interface 	string 		  `toml:"interface"`
+	Network   	string 		  `toml:"network"`
+	ArpInterval time.Duration `toml:"arp_interval"`
+}
+
 func Init(engine *xorm.Engine) *gin.Engine {
+	// app config parse
+	var conf Config
+	toml.DecodeFile("config.toml", &conf)
+
+	// routing start
 	r := gin.New()
 	w := melody.New()
 
@@ -152,7 +168,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 		for {
 			msg = []byte(strconv.Itoa(EventUpdate))
 			w.Broadcast(msg)
-			time.Sleep(time.Second * 10)
+			time.Sleep(time.Second * conf.App.ArpInterval)
 		}
 	})
 
