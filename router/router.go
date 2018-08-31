@@ -6,6 +6,7 @@ import (
 	"os"
 	"io"
 	"strconv"
+	"time"
 
 	"../models"
 
@@ -99,12 +100,12 @@ func Init(engine *xorm.Engine) *gin.Engine {
 							c.JSON(http.StatusBadRequest, errMsg)
 						} else {
 							// save user icon
-							file, header, _ := c.Request.FormFile("icon")
+							file, _, _ := c.Request.FormFile("icon")
 							defer file.Close()
-							out, _ := os.Create("./userIcon/"+header.Filename)
+							out, _ := os.Create("./userIcon/"+user.UserName)
 							defer out.Close()
 							io.Copy(out, file)
-							user.IconPath = "userIcon/"+header.Filename
+							user.IconPath = "userIcon/"+user.UserName
 
 							// insert request
 							_, err = engine.Insert(&user)
@@ -126,6 +127,8 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 			// get request
 			userName := c.Params.ByName("userName")
+			os.Remove("./userIcon/"+userName)
+
 			_, err := engine.Where("user_name = '"+userName+"'").Delete(&user)
 			if err != nil {
 				errMsg = "query failed (delete user)"
@@ -146,8 +149,11 @@ func Init(engine *xorm.Engine) *gin.Engine {
 	})
 
 	w.HandleMessage(func(s *melody.Session, msg []byte) {
-		msg = []byte(strconv.Itoa(EventUpdate))
-		w.Broadcast(msg)
+		for {
+			msg = []byte(strconv.Itoa(EventUpdate))
+			w.Broadcast(msg)
+			time.Sleep(time.Second * 10)
+		}
 	})
 
 	return r
