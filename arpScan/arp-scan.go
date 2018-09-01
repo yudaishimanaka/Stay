@@ -30,7 +30,7 @@ func inc(ip net.IP) {
 	}
 }
 
-func ArpScan(network, ifName string) (hwAddrList []string, err error) {
+func ArpScan(network, ifName string, timeout time.Duration) (hwAddrList []string, err error) {
 	ifIndex, err := net.InterfaceByName(ifName)
 	if err != nil {
 		return nil, err
@@ -50,7 +50,7 @@ func ArpScan(network, ifName string) (hwAddrList []string, err error) {
 
 	for _, ipString := range ipStrings {
 
-		if err := conn.SetDeadline(time.Now().Add(10*time.Millisecond)); err != nil {
+		if err := conn.SetDeadline(time.Now().Add(timeout*time.Millisecond)); err != nil {
 			continue
 		}
 
