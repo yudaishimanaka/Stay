@@ -2,6 +2,7 @@
 interface = ""
 network = ""
 arp_interval =
+arp_timeout =
 
 [mysql]
 user = ""
