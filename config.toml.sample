@@ -1,10 +1,9 @@
 [app]
-interface = ""
-network = ""
-arp_interval =
-arp_timeout =
-
+interface = "" # e.g.) interface = "ehe0"
+network = "" # e.g.) network = "192.168.1.0/24"
+arp_interval =   # Second designation. e.g.) arp_interval = 60
+arp_timeout =   # Millisecond designation. e.g.) arp_timeout = 10
 [mysql]
-user = ""
-password = ""
-database = ""
+user = "" # Your mysql user
+password = "" # Your mysql password
+database = "" # Using database name
