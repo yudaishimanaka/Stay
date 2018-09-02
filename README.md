@@ -1,11 +1,11 @@
 <div align="center">
-<img src="https://github.com/yudaishimanaka//blob/master/images/analysis.png" alt="armadillo" width="128" height="128">
+<img src="https://github.com/yudaishimanaka/Stay/blob/master/images/analysis.png" alt="armadillo" width="128" height="128">
 </div>
 
 # Stay
 In-room management system using arp
 
-## RequirementStay
+## Requirement
 - Golang 1.10.x ~
 - External package
   - github.com/BurntSushi/toml
