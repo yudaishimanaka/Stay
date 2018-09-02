@@ -130,11 +130,20 @@ func Init(engine *xorm.Engine) *gin.Engine {
 							c.JSON(http.StatusBadRequest, errMsg)
 						} else {
 							// save user icon
-							file, _, _ := c.Request.FormFile("icon")
-							defer file.Close()
-							out, _ := os.Create("./userIcon/"+user.UserName)
-							defer out.Close()
-							io.Copy(out, file)
+							file, _, err := c.Request.FormFile("icon")
+							if err != nil {
+								file, _ := os.Open("./assets/images/default.jpg")
+								out, _ := os.Create("./userIcon/"+user.UserName)
+								io.Copy(out, file)
+								out.Close()
+								file.Close()
+							} else {
+								out, _ := os.Create("./userIcon/"+user.UserName)
+								io.Copy(out, file)
+								out.Close()
+								file.Close()
+							}
+
 							user.IconPath = "userIcon/"+user.UserName
 
 							// insert request
