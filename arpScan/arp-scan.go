@@ -49,14 +49,17 @@ func ArpScan(network, ifName string, timeout time.Duration) (hwAddrList []string
 	defer conn.Close()
 
 	for _, ipString := range ipStrings {
-
 		if err := conn.SetDeadline(time.Now().Add(timeout*time.Millisecond)); err != nil {
 			continue
+		} else {
+			targetIp := net.ParseIP(ipString).To4()
+			hwAddr, _ := conn.Resolve(targetIp)
+			if hwAddr.String() == "" {
+				continue
+			} else {
+				hwAddrList = append(hwAddrList, hwAddr.String())
+			}
 		}
-
-		targetIp := net.ParseIP(ipString).To4()
-		hwAddr, _ := conn.Resolve(targetIp)
-		hwAddrList = append(hwAddrList, hwAddr.String())
 	}
 
 	return hwAddrList, nil

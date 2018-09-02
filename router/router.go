@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"../models"
+	"../arpScan"
 
 	"github.com/gin-gonic/gin"
 	"gopkg.in/olahol/melody.v1"
@@ -29,6 +30,7 @@ type AppConfig struct {
 	Interface 	string 		  `toml:"interface"`
 	Network   	string 		  `toml:"network"`
 	ArpInterval time.Duration `toml:"arp_interval"`
+	ArpTimeOut  time.Duration `toml:"arp_timeout"`
 }
 
 func Init(engine *xorm.Engine) *gin.Engine {
@@ -78,6 +80,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 		userGroup.GET("/viewAll", func(c *gin.Context) {
 			var users []models.User
+			var response []models.User
 			var errMsg string
 
 			err := engine.Find(&users)
@@ -85,7 +88,18 @@ func Init(engine *xorm.Engine) *gin.Engine {
 				errMsg = "query failed (select * from user)"
 				c.JSON(http.StatusBadRequest, errMsg)
 			} else {
-				c.JSON(http.StatusCreated, users)
+				// mac addr verification
+				hwAddrList, _ := arpScan.ArpScan(conf.App.Network, conf.App.Interface, conf.App.ArpTimeOut)
+				for _, hwAddr := range hwAddrList {
+					for _, user := range users {
+						if hwAddr == user.HwAddr {
+							response = append(response, user)
+						} else {
+							continue
+						}
+					}
+				}
+				c.JSON(http.StatusCreated, response)
 			}
 		})
 
@@ -164,6 +178,7 @@ func Init(engine *xorm.Engine) *gin.Engine {
 		log.Printf("websocket connection close.")
 	})
 
+	// loop per arp interval
 	w.HandleMessage(func(s *melody.Session, msg []byte) {
 		for {
 			msg = []byte(strconv.Itoa(EventUpdate))
