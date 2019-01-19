@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 	"io"
-	"strconv"
 	"time"
+	"bytes"
 
 	"../models"
 	"../arpScan"
@@ -16,10 +16,8 @@ import (
 	"github.com/go-xorm/xorm"
 	"github.com/BurntSushi/toml"
 	_ "github.com/go-sql-driver/mysql"
-)
-
-const (
-	EventUpdate = iota
+	"github.com/gin-gonic/gin/json"
+	"unsafe"
 )
 
 type Config struct {
@@ -75,31 +73,6 @@ func Init(engine *xorm.Engine) *gin.Engine {
 					errMsg = "user not found"
 					c.JSON(http.StatusBadRequest, errMsg)
 				}
-			}
-		})
-
-		userGroup.GET("/viewAll", func(c *gin.Context) {
-			var users []models.User
-			var response []models.User
-			var errMsg string
-
-			err := engine.Find(&users)
-			if err != nil {
-				errMsg = "query failed (select * from user)"
-				c.JSON(http.StatusBadRequest, errMsg)
-			} else {
-				// mac addr verification
-				hwAddrList, _ := arpScan.ArpScan(conf.App.Network, conf.App.Interface, conf.App.ArpTimeOut)
-				for _, hwAddr := range hwAddrList {
-					for _, user := range users {
-						if hwAddr == user.HwAddr {
-							response = append(response, user)
-						} else {
-							continue
-						}
-					}
-				}
-				c.JSON(http.StatusCreated, response)
 			}
 		})
 
@@ -189,10 +162,32 @@ func Init(engine *xorm.Engine) *gin.Engine {
 
 	// loop per arp interval
 	w.HandleMessage(func(s *melody.Session, msg []byte) {
-		for {
-			msg = []byte(strconv.Itoa(EventUpdate))
-			w.Broadcast(msg)
-			time.Sleep(time.Second * conf.App.ArpInterval)
+		var users []models.User
+
+		err := engine.Find(&users)
+		if err != nil {
+			w.Broadcast([]byte("error"))
+		} else {
+			for {
+				var response []models.User
+				// mac addr verification
+				hwAddrList, _ := arpScan.ArpScan(conf.App.Network, conf.App.Interface, conf.App.ArpTimeOut)
+				for _, hwAddr := range hwAddrList {
+					for _, user := range users {
+						if hwAddr == user.HwAddr {
+							response = append(response, user)
+						} else {
+							continue
+						}
+					}
+				}
+				var buf bytes.Buffer
+				b, _ := json.Marshal(response)
+				buf.Write(b)
+				jsonString := buf.String()
+				w.Broadcast(*(*[]byte)(unsafe.Pointer(&jsonString)))
+				time.Sleep(time.Second * conf.App.ArpInterval)
+			}
 		}
 	})
 
