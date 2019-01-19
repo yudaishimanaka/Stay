@@ -12,26 +12,12 @@ ws.addEventListener('open', function () {
 
 // listen message
 ws.addEventListener('message', function (ev) {
-    console.log('event id is', ev.data);
-    if (ev.data == EventUpdate) {
-        fetch(window.location.protocol+'//'+window.location.host+'/user/viewAll')
-            .then(function (response) {
-                if(response.ok) {
-                    return response.json();
-                }
-
-                throw new Error('Network response was not ok.')
-            })
-            .then(function (json) {
-                console.log(json);
-                $(".users").html("");
-                for(var i = 0; json.length; i++) {
-                    var path = window.location.protocol+"//"+window.location.host+"/"+json[i]["IconPath"];
-                    $(".users").append('<div class="user-box"><div class="bg-image" style="background-image: url('+path+')"></div><span class="image-title">'+json[i]["UserName"]+'</span></div>');
-                }
-            })
-    } else {
-        console.log("event failed");
+    var s = JSON.parse(ev.data);
+    console.log(s);
+    $(".users").html("");
+    for(var i = 0; s.length; i++) {
+        var path = window.location.protocol+"//"+window.location.host+"/"+s[i]["IconPath"];
+        $(".users").append('<div class="user-box"><div class="bg-image" style="background-image: url('+path+')"></div><span class="image-title">'+s[i]["UserName"]+'</span></div>');
     }
 });
 
